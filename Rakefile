@@ -5,8 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "linesource"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Allows fast line-by-line processing of one or more text files}
+    gem.description = %Q{Walks one or more text files, which may be gzipped, allowing line-by-line processing of the contents}
     gem.email = "daniel@thepolfers.com"
     gem.homepage = "http://github.com/polfer/linesource"
     gem.authors = ["Daniel Polfer"]
