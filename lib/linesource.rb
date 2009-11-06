@@ -1,17 +1,27 @@
 require 'stringio'
 require 'zlib'
 
-# Need to add documenation
-# Need to have different versions of initialize
-# Need to be able to pass in multiple patterns (an array of patterns)
-# Needs to be a gem
-
+# The LineSource class is initialized with a pattern for files that
+# need to be read and processed line by line.  For example, you could
+# pass a pattern to all the log files in a date hierarchy ('**/*.log').
+# Every line in every file will be read and the transition from file
+# to file is handled automatically (with callbacks if desired).
 class LineSource
   
   include Enumerable
   
+  # Linenum represents the line number of the current file (1 based).
   attr_reader :linenum
   
+  # Constructor can take a number of different options including
+  # the pattern of files to be read (Dir.glob style).  The files can
+  # be regular text files or gzipped files (detected through a .gz)
+  # extension.  The skiplines parameter can be used to specify a certain
+  # number of lines at the head of each file that should be skipped
+  # (usually header files, for example on a csv file). The filenew
+  # and filedone params represent a callback that can be fired at the
+  # start or end of processing for each of the files that match pattern.
+  # TODO: We should be able to pass multiple pattenrs to initialize.
   def initialize( pattern, skiplines = 0, filenew = nil, filedone = nil )
     @skiplines = skiplines
     @filenames = Dir.glob(pattern).sort!.freeze
@@ -24,18 +34,24 @@ class LineSource
     nextfile
   end
 
+  # Allows the prefile callback to be set after LineSource creation.
   def setfilenew( filenew )
     @filenew = filenew
   end
   
+  # Allows the postfile callback to be set after LineSource creation.
   def setfiledone( filedone )
     @filedone = filedone
   end
 
+  # Tests if the end of _all_ files in the original pattern are processed.
   def eof?
     @content ? @content.eof? : true
   end
 
+  # Closes all files held open on the current LineSource.
+  # Effectively ends the use of this LineSource.
+  # TODO: We could make it so that a close is like a "reset".
   def close
     if @content
       @filedone.call(self) if @filedone
@@ -47,6 +63,7 @@ class LineSource
     @linenum = -1    
   end
 
+  # Skips the current file being processed and sets to the next.
   def nextfile
       begin
         if @content
@@ -78,6 +95,7 @@ class LineSource
       end
   end
 
+  # Returns an individual line from the LineSource.
   def gets
     @lastline = nil
     if @content
@@ -91,18 +109,23 @@ class LineSource
     @lastline
   end
   
+  # Re-returns the last line fetched from a LineSource.
   def lastline
     @lastline
   end
 
+  # Returns the name of the file currently being processed.
   def filename
     @index >= 0 ? @filenames[@index] : nil
   end
   
+  # Returns the size of the file currently being processed.  Note
+  # that in the case of a GZipped file this will be the compressed size.
   def filesize
     (@index >= 0 && @filenames[@index]) ? File.stat(@filenames[@index]).size : -1
   end
   
+  # Calls a block of code for each line from the LineSource.
   def each
     while gets
       yield @lastline

@@ -10,6 +10,7 @@ begin
     gem.email = "daniel@thepolfers.com"
     gem.homepage = "http://github.com/polfer/linesource"
     gem.authors = ["Daniel Polfer"]
+    gem.has_rdoc = true
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
