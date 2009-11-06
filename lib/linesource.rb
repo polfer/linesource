@@ -86,7 +86,6 @@ class LineSource
         @filenew.call(self) if @filenew
       rescue
         if @index < @filenames.length
-          puts "\nERROR! Could not open #{@filenames[@index]}... skipping file!"
           retry
         end
         nil
